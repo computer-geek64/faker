@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "curl_helper.c"
-#include "cJSON.c"
+#include "cJSON/cJSON.c"
 
 struct identity {
     int male;
