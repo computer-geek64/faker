@@ -6,17 +6,22 @@
 #include <curl/curl.h>
 #include <string.h>
 
+struct responseText {
+    char *text;
+    size_t len;
+};
 
-size_t writeCallback(void *ptr, size_t size, size_t nmemb, char *responseText) {
-    size_t resizeLength = size * nmemb + sizeof(*responseText) - 1;
-    responseText = realloc(responseText, resizeLength + 1);
-    if (responseText == NULL) {
+size_t writeCallback(void *ptr, size_t size, size_t nmemb, struct responseText *r) {
+    size_t resizeLength = r->len + size * nmemb;
+    r->text = realloc(r->text, resizeLength + 1);
+    if(r->text == NULL) {
         printf("Out of memory\n");
         exit(1);
     }
 
-    memcpy(responseText + sizeof(*responseText) - 1, ptr, size * nmemb);
-    responseText[resizeLength] = '\0';
+    memcpy(r->text + r->len, ptr, size * nmemb);
+    r->text[resizeLength] = '\0';
+    r->len = resizeLength;
     return size * nmemb;
 }
 
@@ -28,15 +33,17 @@ char* sendGetRequest(char *url) {
         exit(1);
     }
 
-    char *responseText = malloc(1 * sizeof(char));
-    if(responseText == NULL) {
+    struct responseText r;
+    r.len = 0;
+    r.text = malloc(r.len + 1);
+    if(r.text == NULL) {
         printf("Out of memory\n");
         exit(1);
     }
-    responseText[0] = '\0';
+    r.text[0] = '\0';
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, responseText);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &r);
 
     CURLcode responseCode = curl_easy_perform(curl);
 
@@ -46,5 +53,5 @@ char* sendGetRequest(char *url) {
 
     curl_easy_cleanup(curl);
     curl_global_cleanup();
-    return responseText;
+    return r.text;
 }
