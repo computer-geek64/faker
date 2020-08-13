@@ -9,7 +9,7 @@ all: src/main
 src/main: src/main.o
 	gcc $? -o $@ -lcurl
 
-src/main.o: src/main.c src/main.h
+src/main.o: src/main.c src/main.h src/curl_helper.c src/curl_helper.h
 	gcc -c src/main.c -o $@
 
 install: src/main
