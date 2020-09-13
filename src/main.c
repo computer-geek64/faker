@@ -118,6 +118,6 @@ void parseLocationIQJSON(struct identity *person, char *responseText) {
 
 void toLowerCase(char *str) {
     for(int i = 0; i < strlen(str); i++) {
-        str[i] += str[i] >= 65 && str[i] <= 90 ? 32 : 0;
+        str[i] |= 1 << 5;
     }
 }
